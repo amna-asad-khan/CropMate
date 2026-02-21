@@ -213,7 +213,7 @@ def ask_agronomist(request):
             return JsonResponse({'success': False, 'error': 'No message provided'})
         
         # Call Groq API directly using requests
-        api_key = "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"
+        api_key = "API here"
         url = "Your Groq API URL"
         headers = {
             "Authorization": f"Bearer {api_key}",
