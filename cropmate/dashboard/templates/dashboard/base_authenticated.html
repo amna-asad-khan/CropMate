@@ -1,0 +1,234 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}{% block page_title %}CropMate{% endblock %}{% endblock %}
+
+{% block base_styles %}
+/* Floating Layout Container */
+html, body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #6B8DD6 100%);
+    background-attachment: fixed;
+    min-height: 100%;
+    overscroll-behavior: none;
+}
+
+.app-container {
+    display: flex;
+    height: 100vh;
+    padding: 20px;
+    gap: 20px;
+    overflow: hidden;
+}
+
+/* Floating Sidebar */
+.floating-sidebar {
+    width: 280px;
+    height: calc(100vh - 40px);
+    background: linear-gradient(180deg, #1a1f37 0%, #252d4a 100%);
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+}
+
+/* Floating Main Content */
+.floating-main {
+    flex: 1;
+    height: calc(100vh - 40px);
+    background: #f8fafc;
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Mobile Responsive */
+@media (max-width: 1023px) {
+    .app-container {
+        padding: 12px;
+        flex-direction: column;
+        height: 100vh;
+    }
+    
+    .floating-sidebar {
+        position: fixed;
+        left: 12px;
+        top: 12px;
+        bottom: 12px;
+        width: 280px;
+        height: calc(100vh - 24px);
+        z-index: 100;
+        transform: translateX(calc(-100% - 24px));
+    }
+    
+    .floating-sidebar.open {
+        transform: translateX(0);
+    }
+    
+    .floating-main {
+        height: calc(100vh - 24px);
+    }
+}
+
+/* Premium Glass Cards */
+.glass-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Gradient Stat Card */
+.stat-card-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card-gradient::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+}
+
+.stat-card-green {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+}
+
+.stat-card-orange {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+}
+
+.stat-card-blue {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+/* Animations */
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-in > * {
+    opacity: 0;
+    animation: slideUp 0.5s ease forwards;
+}
+
+.animate-in > *:nth-child(1) { animation-delay: 0.05s; }
+.animate-in > *:nth-child(2) { animation-delay: 0.1s; }
+.animate-in > *:nth-child(3) { animation-delay: 0.15s; }
+.animate-in > *:nth-child(4) { animation-delay: 0.2s; }
+.animate-in > *:nth-child(5) { animation-delay: 0.25s; }
+
+/* Gauge Chart */
+.gauge-wrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
+}
+
+.gauge-wrapper svg {
+    transform: rotate(-90deg);
+}
+
+.gauge-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+{% endblock %}
+
+{% block body_content %}
+<!-- Mobile Overlay -->
+<div id="mobileOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden lg:hidden"></div>
+
+<div class="app-container">
+    {% include "dashboard/components/sidebar.html" %}
+    
+    <div class="floating-main">
+        <!-- Header -->
+        <header class="bg-white border-b border-gray-100">
+            <div class="flex items-center justify-between px-6 lg:px-8 h-16">
+                <!-- Left -->
+                <div class="flex items-center space-x-4">
+                    <button id="sidebarToggle" class="lg:hidden w-10 h-10 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl flex items-center justify-center transition">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div>
+                        <h1 class="text-lg font-bold text-gray-800">{% block header_title %}Dashboard{% endblock %}</h1>
+                        <p class="text-xs text-gray-500 hidden sm:block">{% block header_subtitle %}Overview{% endblock %}</p>
+                    </div>
+                </div>
+                
+                <!-- Right -->
+                <div class="flex items-center space-x-3">
+                    {% block header_extra %}{% endblock %}
+                    
+                    <!-- Search -->
+                    <div class="hidden md:flex items-center bg-gray-50 rounded-xl px-4 py-2.5">
+                        <i class="fas fa-search text-gray-400 text-sm mr-2"></i>
+                        <input type="text" placeholder="Search..." class="bg-transparent text-sm w-40 outline-none text-gray-700">
+                    </div>
+                    
+                    <!-- Notifications -->
+                    <button class="relative w-10 h-10 bg-gray-50 hover:bg-gray-100 rounded-xl flex items-center justify-center transition">
+                        <i class="fas fa-bell text-gray-500"></i>
+                        <span class="absolute -top-1 -right-1 w-5 h-5 bg-violet-500 text-white text-xs rounded-full flex items-center justify-center font-bold">3</span>
+                    </button>
+                    
+                    <!-- User -->
+                    <div class="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-violet-500/30">
+                        {{ user.username|slice:":1"|upper }}
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <main class="flex-1 p-6 lg:p-8 overflow-y-auto">
+            <div class="animate-in">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('mobileOverlay');
+
+    if (toggle) {
+        toggle.onclick = () => {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('hidden');
+        };
+    }
+    if (overlay) {
+        overlay.onclick = () => {
+            sidebar.classList.remove('open');
+            overlay.classList.add('hidden');
+        };
+    }
+});
+</script>
+{% endblock %}

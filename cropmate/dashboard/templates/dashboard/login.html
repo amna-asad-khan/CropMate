@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - CropMate</title>
+    <link rel="icon" href="https://img.freepik.com/premium-vector/agriculture-icon-logo-vector-design-template_827767-2376.jpg?w=826" type="image/x-icon">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        body { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #6B8DD6 100%);
+            min-height: 100vh;
+        }
+        .login-card { animation: slideUp 0.6s ease; }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .input-field:focus { 
+            border-color: #8b5cf6; 
+            box-shadow: 0 0 0 4px rgba(139,92,246,0.15); 
+        }
+        
+        /* Modern Toast Container */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: none;
+        }
+        
+        .toast {
+            pointer-events: all;
+            min-width: 320px;
+            max-width: 420px;
+            padding: 16px 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .toast.removing {
+            animation: slideOutRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(400px); opacity: 0; }
+        }
+        
+        .toast-success { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
+        .toast-error { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; }
+        .toast-info { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; }
+        .toast-warning { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; }
+        
+        .toast-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        
+        .toast-content {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+        
+        .toast-close {
+            width: 28px;
+            height: 28px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        
+        .toast-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.4);
+            animation: progress 3s linear;
+        }
+        
+        @keyframes progress {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+    </style>
+</head>
+
+<body class="flex items-center justify-center p-5">
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+    
+    <div class="w-full max-w-md login-card">
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-white/10 backdrop-blur rounded-2xl mb-4 border border-white/20">
+                <i class="fas fa-leaf text-white text-2xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-white">Welcome back</h1>
+            <p class="text-white/70 mt-1">Sign in to CropMate</p>
+        </div>
+
+        <!-- Floating Card -->
+        <div class="bg-white rounded-3xl shadow-2xl p-8">
+            <form method="post" class="space-y-5">
+                {% csrf_token %}
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                            <i class="fas fa-envelope"></i>
+                        </span>
+                        <input type="email" name="email" required
+                               class="input-field w-full pl-12 pr-4 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl text-gray-800 placeholder-gray-400 outline-none transition"
+                               placeholder="name@example.com">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                        <input type="password" name="password" id="password" required
+                               class="input-field w-full pl-12 pr-12 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-xl text-gray-800 placeholder-gray-400 outline-none transition"
+                               placeholder="••••••••">
+                        <button type="button" onclick="togglePassword('password', this)" 
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-violet-600 transition">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between text-sm">
+                    <label class="flex items-center">
+                        <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500">
+                        <span class="ml-2 text-gray-600">Remember me</span>
+                    </label>
+                    <a href="#" class="text-violet-600 font-medium hover:underline">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="w-full py-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-violet-500/30 transition flex items-center justify-center space-x-2">
+                    <span>Sign In</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-gray-500">Don't have an account?
+                    <a href="{% url 'dashboard:signup' %}" class="text-violet-600 font-semibold hover:underline">Sign Up</a>
+                </p>
+            </div>
+        </div>
+
+        <p class="text-center text-white/60 text-sm mt-6">© 2025 CropMate</p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        // Modern Toast System
+        const Toast = {
+            container: null,
+            
+            init() {
+                this.container = document.getElementById('toast-container');
+            },
+            
+            show(message, type = 'info', duration = 3000) {
+                if (!this.container) this.init();
+                
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-times-circle',
+                    info: 'fa-info-circle',
+                    warning: 'fa-exclamation-triangle'
+                };
+                
+                toast.innerHTML = `
+                    <div class="toast-icon">
+                        <i class="fas ${icons[type]}"></i>
+                    </div>
+                    <div class="toast-content">${message}</div>
+                    <button class="toast-close" onclick="Toast.remove(this.parentElement)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="toast-progress"></div>
+                `;
+                
+                this.container.appendChild(toast);
+                
+                setTimeout(() => {
+                    this.remove(toast);
+                }, duration);
+            },
+            
+            remove(toast) {
+                toast.classList.add('removing');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            },
+            
+            success(message, duration) {
+                this.show(message, 'success', duration);
+            },
+            
+            error(message, duration) {
+                this.show(message, 'error', duration);
+            },
+            
+            info(message, duration) {
+                this.show(message, 'info', duration);
+            },
+            
+            warning(message, duration) {
+                this.show(message, 'warning', duration);
+            }
+        };
+        
+        // Password toggle function
+        function togglePassword(fieldId, button) {
+            const field = document.getElementById(fieldId);
+            const icon = button.querySelector('i');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            Toast.init();
+            
+            // Show Django messages
+            {% if messages %}
+                {% for message in messages %}
+                    {% if message.tags == 'success' %}
+                        Toast.success("{{ message|escapejs }}");
+                    {% elif message.tags == 'error' %}
+                        Toast.error("{{ message|escapejs }}");
+                    {% elif message.tags == 'warning' %}
+                        Toast.warning("{{ message|escapejs }}");
+                    {% else %}
+                        Toast.info("{{ message|escapejs }}");
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        });
+    </script>
+</body>
+</html>

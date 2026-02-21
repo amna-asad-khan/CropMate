@@ -1,0 +1,186 @@
+{% extends "dashboard/base_authenticated.html" %}
+
+{% block page_title %}Weather - CropMate{% endblock %}
+{% block sidebar_weather %}active{% endblock %}
+
+{% block header_title %}Weather{% endblock %}
+{% block header_subtitle %}Local forecast{% endblock %}
+
+{% block content %}
+<!-- Search -->
+<div class="glass-card p-5 mb-6">
+    <form method="GET" class="flex flex-col md:flex-row gap-4 items-center">
+        <div class="flex-1 relative">
+            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input type="text" name="city" value="{{ selected_city }}" placeholder="Search city..."
+                   class="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-xl focus:border-violet-500 outline-none"
+                   list="cities" autocomplete="off">
+            <datalist id="cities">{% for city in popular_cities %}<option value="{{ city }}">{% endfor %}</datalist>
+        </div>
+        <button type="submit" class="px-6 py-3 bg-gradient-to-r from-violet-600 to-purple-600 text-white font-medium rounded-xl hover:shadow-lg transition">
+            <i class="fas fa-cloud-sun mr-2"></i>Get Weather
+        </button>
+    </form>
+</div>
+
+{% if error_message %}
+<div class="glass-card p-4 mb-6 bg-red-50 text-red-700 flex items-center rounded-xl">
+    <i class="fas fa-exclamation-circle mr-3"></i>{{ error_message }}
+</div>
+{% endif %}
+
+{% if weather_data %}
+<!-- Current Weather -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <div class="lg:col-span-2 stat-card-gradient p-8 relative z-10">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-white/70 mb-1">{{ weather_data.city }}, {{ weather_data.country }}</p>
+                <p class="text-6xl font-bold mb-2">{{ weather_data.temp }}°C</p>
+                <p class="text-white/80 capitalize text-lg">{{ weather_data.description }}</p>
+                <p class="text-white/60 text-sm mt-2">Feels like {{ weather_data.feels_like }}°C</p>
+            </div>
+            <img src="http://openweathermap.org/img/wn/{{ weather_data.icon }}@4x.png" alt="" class="w-32 h-32 drop-shadow-lg">
+        </div>
+    </div>
+    
+    <div class="space-y-4">
+        <div class="glass-card p-5">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-tint text-blue-600 text-lg"></i>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-sm">Humidity</p>
+                    <p class="text-2xl font-bold text-gray-800">{{ weather_data.humidity }}%</p>
+                </div>
+            </div>
+        </div>
+        <div class="glass-card p-5">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 bg-violet-100 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-wind text-violet-600 text-lg"></i>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-sm">Wind Speed</p>
+                    <p class="text-2xl font-bold text-gray-800">{{ weather_data.wind_speed }} km/h</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 7 Day Forecast -->
+<div class="glass-card p-6">
+    <h3 class="font-semibold text-gray-800 mb-6">7-Day Forecast</h3>
+    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+        {% for day in forecast_data %}
+        <div class="forecast-card text-center p-4 rounded-2xl border border-gray-100 hover:shadow-xl transition-all cursor-pointer group relative overflow-hidden"
+             data-icon="{{ day.icon }}">
+            <!-- Dynamic background will be set by JS -->
+            <div class="card-bg absolute inset-0 opacity-20"></div>
+            
+            <div class="relative z-10">
+                <p class="font-bold text-gray-800">{{ day.day_short }}</p>
+                <p class="text-xs text-gray-500 mb-2">{{ day.date|slice:"5:" }}</p>
+                
+                <!-- Weather Icon -->
+                <div class="mx-auto w-16 h-16 mb-2 flex items-center justify-center">
+                    <img src="http://openweathermap.org/img/wn/{{ day.icon }}@2x.png" 
+                         class="w-16 h-16 drop-shadow-lg group-hover:scale-110 transition-transform duration-300">
+                </div>
+                
+                <p class="text-2xl font-bold text-gray-800">{{ day.temp_max }}°</p>
+                <p class="text-sm text-gray-500">{{ day.temp_min }}°</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Additional Stats -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+    <div class="glass-card p-4 text-center">
+        <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <i class="fas fa-sun text-amber-500"></i>
+        </div>
+        <p class="text-sm text-gray-500">UV Index</p>
+        <p class="font-bold text-gray-800">{{ weather_data.uv_index|default:"5" }}</p>
+    </div>
+    <div class="glass-card p-4 text-center">
+        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <i class="fas fa-cloud-rain text-blue-500"></i>
+        </div>
+        <p class="text-sm text-gray-500">Today's Rain</p>
+        <p class="font-bold text-gray-800">{{ weather_data.total_rain_today }} mm</p>
+    </div>
+    <div class="glass-card p-4 text-center">
+        <div class="w-10 h-10 bg-violet-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <i class="fas fa-eye text-violet-500"></i>
+        </div>
+        <p class="text-sm text-gray-500">Visibility</p>
+        <p class="font-bold text-gray-800">{{ weather_data.visibility|default:"10" }} km</p>
+    </div>
+    <div class="glass-card p-4 text-center">
+        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <i class="fas fa-compass text-green-500"></i>
+        </div>
+        <p class="text-sm text-gray-500">Pressure</p>
+        <p class="font-bold text-gray-800">{{ weather_data.pressure|default:"1013" }} hPa</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.forecast-card {
+    background: white;
+    transition: all 0.3s ease;
+}
+.forecast-card:hover {
+    transform: translateY(-6px);
+}
+/* Weather-based card styles */
+.forecast-card.sunny { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-color: #f59e0b; }
+.forecast-card.sunny .card-bg { background: linear-gradient(135deg, #f59e0b, #eab308); }
+.forecast-card.cloudy { background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); border-color: #94a3b8; }
+.forecast-card.cloudy .card-bg { background: linear-gradient(135deg, #64748b, #94a3b8); }
+.forecast-card.rainy { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-color: #3b82f6; }
+.forecast-card.rainy .card-bg { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.forecast-card.stormy { background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%); border-color: #8b5cf6; }
+.forecast-card.stormy .card-bg { background: linear-gradient(135deg, #7c3aed, #8b5cf6); }
+.forecast-card.snowy { background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); border-color: #0ea5e9; }
+.forecast-card.snowy .card-bg { background: linear-gradient(135deg, #0ea5e9, #06b6d4); }
+.forecast-card.misty { background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-color: #cbd5e1; }
+.forecast-card.misty .card-bg { background: linear-gradient(135deg, #94a3b8, #cbd5e1); }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.forecast-card').forEach(card => {
+        const icon = card.dataset.icon || '';
+        // OpenWeatherMap icon codes: 01=clear, 02=few clouds, 03/04=clouds, 09/10=rain, 11=thunder, 13=snow, 50=mist
+        if (icon.startsWith('01')) {
+            card.classList.add('sunny');
+        } else if (icon.startsWith('02')) {
+            card.classList.add('sunny'); // partly cloudy still sunny-ish
+        } else if (icon.startsWith('03') || icon.startsWith('04')) {
+            card.classList.add('cloudy');
+        } else if (icon.startsWith('09') || icon.startsWith('10')) {
+            card.classList.add('rainy');
+        } else if (icon.startsWith('11')) {
+            card.classList.add('stormy');
+        } else if (icon.startsWith('13')) {
+            card.classList.add('snowy');
+        } else if (icon.startsWith('50')) {
+            card.classList.add('misty');
+        } else {
+            card.classList.add('cloudy'); // default
+        }
+    });
+});
+</script>
+{% endblock %}

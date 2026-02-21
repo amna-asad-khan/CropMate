@@ -1,0 +1,131 @@
+<!-- Floating Dark Sidebar -->
+<aside id="sidebar" class="floating-sidebar">
+    <!-- Logo -->
+    <div class="p-6">
+        <div class="flex items-center space-x-3">
+            <div class="w-11 h-11 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30">
+                <i class="fas fa-leaf text-white text-lg"></i>
+            </div>
+            <div>
+                <h1 class="text-white font-bold text-lg">CropMate</h1>
+                <p class="text-gray-400 text-xs">Smart Farming</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Card -->
+    <div class="px-5 pb-6">
+        <div class="bg-white/5 rounded-2xl p-4 border border-white/10">
+            <div class="flex items-center space-x-3">
+                <div class="w-11 h-11 bg-gradient-to-br from-violet-400 to-purple-500 rounded-xl flex items-center justify-center">
+                    <span class="text-white font-bold">{{ user.username|slice:":1"|upper }}</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-white font-medium text-sm truncate">{{ user.username|title }}</p>
+                    <p class="text-violet-300 text-xs">Farmer</p>
+                </div>
+                <span class="w-2.5 h-2.5 bg-green-400 rounded-full"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 px-4 overflow-visible">
+        <p class="px-3 mb-3 text-gray-500 text-xs font-semibold uppercase tracking-wider">Menu</p>
+        
+        <a href="{% url 'dashboard:dashboard' %}" class="nav-link {% block sidebar_dashboard %}{% endblock %}">
+            <i class="fas fa-th-large w-5"></i>
+            <span>Dashboard</span>
+        </a>
+        
+        <a href="{% url 'dashboard:recommendations' %}" class="nav-link {% block sidebar_recommendations %}{% endblock %}">
+            <i class="fas fa-seedling w-5"></i>
+            <span>Recommendations</span>
+        </a>
+        
+        <a href="{% url 'dashboard:agronomist' %}" class="nav-link {% block sidebar_agronomist %}{% endblock %}">
+            <i class="fas fa-robot w-5"></i>
+            <span>AI Agronomist</span>
+            <span class="ml-auto text-xs px-2 py-0.5 bg-violet-500 text-white rounded-full">New</span>
+        </a>
+        
+        <p class="px-3 mt-6 mb-3 text-gray-500 text-xs font-semibold uppercase tracking-wider">Data</p>
+        
+        <a href="{% url 'dashboard:sensors' %}" class="nav-link {% block sidebar_sensors %}{% endblock %}">
+            <i class="fas fa-microchip w-5"></i>
+            <span>Sensors</span>
+            <span class="ml-auto flex items-center text-green-400 text-xs">
+                <span class="w-1.5 h-1.5 bg-green-400 rounded-full mr-1 animate-pulse"></span>Live
+            </span>
+        </a>
+        
+        <a href="{% url 'dashboard:weather' %}" class="nav-link {% block sidebar_weather %}{% endblock %}">
+            <i class="fas fa-cloud-sun w-5"></i>
+            <span>Weather</span>
+        </a>
+    </nav>
+
+    <!-- Bottom -->
+    <div class="p-4 border-t border-white/5">
+        <a href="{% url 'dashboard:settings' %}" class="nav-link {% block sidebar_settings %}{% endblock %}">
+            <i class="fas fa-cog w-5"></i>
+            <span>Settings</span>
+        </a>
+        
+        <a href="{% url 'dashboard:logout' %}" class="nav-link text-red-400 hover:bg-red-500/10">
+            <i class="fas fa-sign-out-alt w-5"></i>
+            <span>Logout</span>
+        </a>
+    </div>
+</aside>
+
+<style>
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    color: #9ca3af;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+.nav-link.active {
+    background: white;
+    color: #1f2937;
+    border-radius: 0 14px 14px 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    position: relative;
+    margin-left: -16px;
+    padding-left: 30px;
+}
+
+.nav-link.active i {
+    color: #8b5cf6;
+}
+</style>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const links = document.querySelectorAll(".nav-link");
+    const currentPath = window.location.pathname;
+
+    links.forEach(link => {
+        const linkPath = new URL(link.href).pathname;
+
+        if (currentPath === linkPath) {
+            link.classList.add("active");
+        } else {
+            link.classList.remove("active");
+        }
+    });
+});
+</script>
